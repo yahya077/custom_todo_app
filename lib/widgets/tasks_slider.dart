@@ -2,12 +2,12 @@ import 'package:customtodoapp/utils/sized_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
-class CategoriesSlider extends StatefulWidget {
+class TasksSlider extends StatefulWidget {
   @override
-  _CategoriesSliderState createState() => _CategoriesSliderState();
+  _TasksSliderState createState() => _TasksSliderState();
 }
 
-class _CategoriesSliderState extends State<CategoriesSlider> {
+class _TasksSliderState extends State<TasksSlider> {
   @override
   Widget build(BuildContext context) {
     return Container(
