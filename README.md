@@ -1,6 +1,6 @@
 # customtodoapp
 
-A todo app with great design
+![landing_page](https://user-images.githubusercontent.com/46659611/80493871-a112e780-896e-11ea-9a6e-7d5abee0c686.png)
 
 ## Getting Started
 
