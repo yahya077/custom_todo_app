@@ -1,5 +1,7 @@
 # customtodoapp
 
+Custom todo app in dart and the api is written with php
+
 ![landing_page](https://user-images.githubusercontent.com/46659611/80493871-a112e780-896e-11ea-9a6e-7d5abee0c686.png)
 
 ![ezgif-2-76c984d46ced](https://user-images.githubusercontent.com/46659611/80509035-7f6f2b80-8981-11ea-9b65-d3a7e1b1bf54.gif)
