@@ -10,6 +10,8 @@ import '../core/models/Task.dart';
 import '../core/models/TaskCategories.dart';
 //service
 import '../core/services/task_service.dart';
+//screen
+import 'add_categories_screen.dart';
 
 class AddNoteScreen extends StatefulWidget {
   AddNoteScreen() : super();
@@ -207,30 +209,51 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   }
 
 Widget _getCategoriesGrid(BuildContext context, int index){
-  return GestureDetector(
-    onTap: () {
-    if (_categories.any((item) => item.isSelected)) {
-      setState(() {
-        _categories[index].isSelected = false;
-      });
-    }else {
-      setState(() {
-        _categories[index].isSelected = true;
-        _selectedCategory = _categories[index].id;
-      });
-    }
-  },
-    child: Container(
-      width: 120,
-      alignment: Alignment.center,
-      margin: EdgeInsets.only(right: 8),
-      decoration: BoxDecoration(
-        border: Border.all(width: 1, color: _categories[index].isSelected == true ? Color(0xff7b77FF) : Colors.white),
-        borderRadius: BorderRadius.circular(15),
-        color: _categories[index].isSelected == true ? Colors.white : Color(0xff7B77FF),
+  if (_categories[index].id == "1") {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddCategoryScreen()));
+      },
+      child: Hero(
+        tag: "addCategory",
+        child: Container(
+          width: 120,
+          alignment: Alignment.center,
+          margin: EdgeInsets.only(right: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(width: 1, color: Color(0xff191970)),
+          ),
+          child: Icon(Icons.add, color: Color(0xff191970),),
+        ),
       ),
-      child: Text(_categories[index].title, style: TextStyle(color: _categories[index].isSelected == true ? Color(0xff7B77FF):Colors.white),),
-    ),
-  );
+    );
+  }else {
+    return GestureDetector(
+      onTap: () {
+        if (_categories.any((item) => item.isSelected)) {
+          setState(() {
+            _categories[index].isSelected = false;
+          });
+        }else {
+          setState(() {
+            _categories[index].isSelected = true;
+            _selectedCategory = _categories[index].id;
+          });
+        }
+      },
+      child: Container(
+        width: 120,
+        alignment: Alignment.center,
+        margin: EdgeInsets.only(right: 8),
+        decoration: BoxDecoration(
+          border: Border.all(width: 1, color: _categories[index].isSelected == true ? Color(0xff8BC9DF) : Colors.white),
+          borderRadius: BorderRadius.circular(15),
+          color: _categories[index].isSelected == true ? Colors.white : Color(int.parse(_categories[index].color)),
+        ),
+        child: Text(_categories[index].title, style: TextStyle(color: _categories[index].isSelected == true ? Color(0xff8BC9DF):Colors.white),),
+      ),
+    );
+  }
   }
 }

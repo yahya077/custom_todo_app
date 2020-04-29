@@ -6,6 +6,7 @@ class TaskServices {
 
   static const ROOT = 'http://192.168.1.33/taskmanager/api.php';
   static const _ADD_TASK_ACTION = 'ADD_TASK';
+  static const _ADD_CATEGORY_ACTION = 'ADD_CATEGORY';
   static const _GET_CATEGORIES_ACTION = 'GET_ALL_CATEGORIES';
 
   static Future<String> addTask(String taskBy, String catId, String title, String description, String taskOn, String status) async {
@@ -20,6 +21,27 @@ class TaskServices {
       map['status'] = status;
       final response = await http.post(ROOT, body: map);
       print('Add Task Response: ${response.body}');
+      if(response.statusCode == 200){
+        return response.body;
+      }else {
+        return response.statusCode.toString();
+      }
+    }catch(e){
+      print(e.toString());
+      return e.toString();
+    }
+  }
+
+  static Future<String> addCategory(String catBy, String title, String icon, String color) async {
+    try{
+      var map = Map<String, dynamic>();
+      map['action'] = _ADD_CATEGORY_ACTION;
+      map['cat_by'] = catBy;
+      map['title'] = title;
+      map['color'] = color;
+      map['icon'] = icon;
+      final response = await http.post(ROOT, body: map);
+      print('Add Category Response: ${response.body}');
       if(response.statusCode == 200){
         return response.body;
       }else {
