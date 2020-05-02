@@ -35,6 +35,7 @@ class _LandingScreenState extends State<LandingScreen> {
   ItemScrollController _scrollController = ItemScrollController();
   DateTime _dateTime;
   List<String> _splittedDate;
+  String _filterDateQuerry;
   String _initialScrollIndex;
   String _headerDate;
   String _todayHeaderDay;
@@ -50,6 +51,7 @@ class _LandingScreenState extends State<LandingScreen> {
     _todayHeaderMonth = "0";
     _dateTime = DateTime.now();
     _splittedDate = _dateTime.toString().split(" ");
+    _filterDateQuerry = _splittedDate[0];
     _categories = [];
     _tasks = [];
     _dateData = [];
@@ -103,6 +105,7 @@ class _LandingScreenState extends State<LandingScreen> {
 //  }
 
   _getTodayTasks(String x) async{
+    print(_filterDateQuerry);
     await TaskServices.getTasks("tasks.task_on like '"+x+"%'").then((tasks){
       setState(() {
         _tasks = tasks;
@@ -112,7 +115,6 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   _completeTask(String selectedId,String value){
-    print(selectedId+"****"+value);
     TaskServices.updateTaskStatus(selectedId,value).then((result){
       if('success' == result){
 
@@ -168,7 +170,9 @@ class _LandingScreenState extends State<LandingScreen> {
                                 }
                                 _dateData[index].isSelected = true;
                                 _initialScrollIndex = index.toString();
-                                _getTodayTasks(_dateData[index].year+"-"+_dateData[index].month+"-"+_dateData[index].day);
+                                var query = _dateData[index].year+"-"+_dateData[index].month+"-"+_dateData[index].day;
+                                _filterDateQuerry = query;
+                                _getTodayTasks(_filterDateQuerry);
                               });
                             }
                           },
@@ -286,13 +290,13 @@ class _LandingScreenState extends State<LandingScreen> {
                                             _completeTask(_tasks[index].id, "1");
                                             setState(() {
                                               _getAllCategories();
-                                              _getTodayTasks(_splittedDate[0]);
+                                              _getTodayTasks(_filterDateQuerry);
                                             });
                                           }else{
                                             _completeTask(_tasks[index].id, "0");
                                             setState(() {
                                               _getAllCategories();
-                                              _getTodayTasks(_splittedDate[0]);
+                                              _getTodayTasks(_filterDateQuerry);
                                             });
                                           }
                                         },
