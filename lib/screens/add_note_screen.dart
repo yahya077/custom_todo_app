@@ -14,32 +14,33 @@ import '../core/services/task_service.dart';
 import 'add_categories_screen.dart';
 
 class AddNoteScreen extends StatefulWidget {
-  AddNoteScreen() : super();
-  final String header = "Add New Task";
+  Task task;
+  AddNoteScreen({this.task});
   final String by = "1";
+  final double ITEM_WIDTH = 200.0;
   @override
   _AddNoteScreenState createState() => _AddNoteScreenState();
 }
 
 class _AddNoteScreenState extends State<AddNoteScreen> {
-  List<Task> _tasks;
   List<TaskCategories> _categories;
   GlobalKey<ScaffoldState> _scaffoldKey;
   TextEditingController _title;
   TextEditingController _description;
   String _headerProgress;
   String _selectedCategory;
-  DateTime _dateTime = DateTime.now();
+  DateTime _dateTime;
 
   @override
   void initState() {
     super.initState();
-    _tasks = [];
     _categories = [];
-    _headerProgress = widget.header;
+    _headerProgress = widget.task != null ? "Update Your Task" : "Add New Task";
+    _selectedCategory = widget.task != null ? widget.task.category.id : "";
+    _dateTime = widget.task != null ? DateTime.parse(widget.task.taskOn) : DateTime.now();
     _scaffoldKey = GlobalKey();
-    _title = TextEditingController();
-    _description = TextEditingController();
+    _title = TextEditingController(text: widget.task != null ? widget.task.title : "");
+    _description = TextEditingController(text: widget.task != null ? widget.task.description : "");
     _getAllCategories();
   }
 
@@ -52,6 +53,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   _clearValues(){
     _title.text = "";
     _description.text = "";
+    _selectedCategory = "";
+    _dateTime = DateTime.now();
   }
 
   _showSnackBar(context, msg){
@@ -59,15 +62,17 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
   }
 
   _addTask(){
-    if(_title.text.isEmpty || _description.text.isEmpty || _selectedCategory.toString().isEmpty || _categories.any((item) => item.isSelected = false)){
+    if(_title.text.isEmpty || _description.text.isEmpty || _selectedCategory.toString().isEmpty){
       print("Empty Fields");
       return;
     }
+
     _showProgress("Adding Task");
     TaskServices.addTask(widget.by, _selectedCategory, _title.text, _description.text, _dateTime.toString(), "0").then((result){
       if(result == "success"){
         _showSnackBar(context, "Add completed");
         _clearValues();
+        _showProgress("Add New Task");
       }else {
         _showSnackBar(context, "Error");
       }
@@ -79,16 +84,49 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
       setState(() {
         _categories = categories;
       });
+      for(var i=0; i < _categories.length; i++){
+        if(widget.task != null || _selectedCategory != null){
+          if(_categories[i].id == _selectedCategory){
+            setState(() {
+              _categories[i].isSelected = true;
+            });
+          }else if (widget.task != null){
+            if(_categories[i].id == widget.task.category.id){
+              setState(() {
+                _categories[i].isSelected = true;
+              });
+            }
+          }
+        }
+      }
       print("length ${categories.length}");
     });
   }
 
+  _updateTask(){
+    if(_title.text.isEmpty || _description.text.isEmpty || _selectedCategory.toString().isEmpty){
+      print("Empty Fields");
+      return;
+    }
+    _showProgress('Updating Task..');
+    TaskServices.updateTask(widget.task.id,widget.by,_selectedCategory.toString(),_title.text,_description.text,_dateTime.toString(),"0").then((result){
+      if('success' == result){
+        _showSnackBar(context, "Update completed");
+        _showProgress("Update Your Task");
+        Navigator.pop(context, true);
+      }else {
+          print("404");
+      }
+    });
+
+
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Color(0xff8BC9DF),
+      backgroundColor: widget.task != null ? Color(int.parse(widget.task.category.color)) : Color(0xff8BC9DF),
       body:
       ListView(
         children: <Widget>[
@@ -101,7 +139,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       InkWell(
-                          onTap: (){Navigator.pop(context);},
+                          onTap: (){Navigator.pop(context, false);},
                           child: Hero(
                               tag: "addTask",
                               child: Icon(Icons.arrow_back_ios, color: Colors.white,))),
@@ -111,7 +149,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 ),
               FadeAnimation(.2, Container(
                 height: 35,
-                child: Text("Add New Task", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),),
+                child: Text(_headerProgress, style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),),
               ),),
               FadeAnimation(.3, Container(
                 width: MediaQuery.of(context).size.width,
@@ -124,7 +162,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                   children: <Widget>[
                       FadeAnimation(.4, Container(
                         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                        child: TextField(
+                        child: TextFormField(
                           controller: _title,
                           decoration: InputDecoration(
                             focusedBorder: InputBorder.none,
@@ -139,7 +177,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                       children: <Widget>[
                         FadeAnimation(.5, Container(
                           padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: TextField(
+                          child: TextFormField(
                             controller: _description,
                             maxLines: 2,
                             decoration: InputDecoration(
@@ -188,14 +226,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                     ),),
                     Sh(50),
                     FadeAnimation(.9,Container(
-                        width: 200,
+                        width: widget.ITEM_WIDTH,
                         height: 50,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: Color(0xff8BC9DF),
+                          color: widget.task != null ? Color(int.parse(widget.task.category.color)) : Color(0xff8BC9DF),
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        child: InkWell(onTap: _addTask,child: Text("Save", style: TextStyle(color: Colors.white, fontSize: 18),)),
+                        child: InkWell(onTap: (){
+                          widget.task != null ? _updateTask() : _addTask();
+                        },child: Text(widget.task != null ? "Update" : "Save", style: TextStyle(color: Colors.white, fontSize: 18),)),
                       ),
                     ),
                   ],
@@ -212,7 +252,17 @@ Widget _getCategoriesGrid(BuildContext context, int index){
   if (_categories[index].id == "1") {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddCategoryScreen()));
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddCategoryScreen())).then((val){
+          if(val != "0"){
+            setState(() {
+              _selectedCategory = val;
+            });
+            _showSnackBar(context, val);
+            _getAllCategories();
+          }else {
+            Container();
+          }
+        });
       },
       child: Hero(
         tag: "addCategory",
@@ -234,11 +284,13 @@ Widget _getCategoriesGrid(BuildContext context, int index){
         if (_categories.any((item) => item.isSelected)) {
           setState(() {
             _categories[index].isSelected = false;
+            print("ifde");
           });
         }else {
           setState(() {
             _categories[index].isSelected = true;
             _selectedCategory = _categories[index].id;
+            print("elsede");
           });
         }
       },
@@ -247,11 +299,11 @@ Widget _getCategoriesGrid(BuildContext context, int index){
         alignment: Alignment.center,
         margin: EdgeInsets.only(right: 8),
         decoration: BoxDecoration(
-          border: Border.all(width: 1, color: _categories[index].isSelected == true ? Color(0xff8BC9DF) : Colors.white),
+          border: Border.all(width: 1, color: _categories[index].isSelected ? Color(0xff8BC9DF) : Colors.white),
           borderRadius: BorderRadius.circular(15),
-          color: _categories[index].isSelected == true ? Colors.white : Color(int.parse(_categories[index].color)),
+          color: _categories[index].isSelected ? Colors.white : Color(int.parse(_categories[index].color)),
         ),
-        child: Text(_categories[index].title, style: TextStyle(color: _categories[index].isSelected == true ? Color(0xff8BC9DF):Colors.white),),
+        child: Text(_categories[index].title, style: TextStyle(color:_categories[index].isSelected ? Color(0xff8BC9DF):Colors.white),),
       ),
     );
   }

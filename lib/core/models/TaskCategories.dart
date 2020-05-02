@@ -6,6 +6,7 @@ class TaskCategories {
   String color;
   String icon;
   bool isSelected = false;
+  String taskToDo = "0";
 
 
   TaskCategories({this.id, this.catBy, this.title, this.color, this.icon});

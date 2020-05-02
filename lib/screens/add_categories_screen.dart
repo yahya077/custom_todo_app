@@ -21,7 +21,6 @@ class AddCategoryScreen extends StatefulWidget {
 }
 
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
-  List<Task> _tasks;
   List<TaskCategories> _categories;
   GlobalKey<ScaffoldState> _scaffoldKey;
   TextEditingController _title;
@@ -32,6 +31,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   List<DropdownMenuItem<int>> _dropIcons;
   int _currentColor;
   int _currentIcon;
+  String addedCategoryId;
 
   List _colors =
   [ 0xff7b77FF,
@@ -56,6 +56,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     _headerProgress = widget.header;
     _scaffoldKey = GlobalKey();
     _title = TextEditingController();
+    addedCategoryId = "0";
     _getAllCategories();
     //Getting Colors
     _dropColors = _getColors();
@@ -120,10 +121,13 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     }
     _showProgress("Adding Category...");
     TaskServices.addCategory(widget.by, _title.text, _currentIcon.toString(), _currentColor.toString()).then((result){
-      if(result == "success"){
-        _showSnackBar(context, "Add completed");
+      print(result);
+      if(result != "error"){
+        setState(() {
+          addedCategoryId = result;
+        });
         _clearValues();
-        _showProgress(widget.header);
+        Navigator.pop(context,addedCategoryId);
       }else {
         _showSnackBar(context, "Error");
       }
@@ -164,7 +168,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       InkWell(
-                          onTap: (){Navigator.pop(context);},
+                          onTap: (){Navigator.pop(context,addedCategoryId);},
                           child: Hero(
                               tag: "addCategory",
                               child: Icon(Icons.arrow_back_ios, color: Colors.white,))),
